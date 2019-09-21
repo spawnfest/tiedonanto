@@ -1,35 +1,72 @@
 %%%-------------------------------------------------------------------
-%% @doc tiedonanto top level supervisor.
-%% @end
+%%% @doc tiedonanto_sup is the main application supervisor.
+%%% @end
 %%%-------------------------------------------------------------------
-
 -module(tiedonanto_sup).
-
 -behaviour(supervisor).
-
--export([start_link/0]).
-
+-export([start_link/0, start_link/1]).
 -export([init/1]).
+-type args() :: list().
 
--define(SERVER, ?MODULE).
-
+%%--------------------------------------------------------------------
+%% @doc start_link/0
+%% @end
+%%--------------------------------------------------------------------
+-spec start_link() -> {ok, term()}.
 start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+    start_link([]).
 
-%% sup_flags() = #{strategy => strategy(),         % optional
-%%                 intensity => non_neg_integer(), % optional
-%%                 period => pos_integer()}        % optional
-%% child_spec() = #{id => child_id(),       % mandatory
-%%                  start => mfargs(),      % mandatory
-%%                  restart => restart(),   % optional
-%%                  shutdown => shutdown(), % optional
-%%                  type => worker(),       % optional
-%%                  modules => modules()}   % optional
-init([]) ->
-    SupFlags = #{strategy => one_for_all,
-                 intensity => 0,
-                 period => 1},
-    ChildSpecs = [],
-    {ok, {SupFlags, ChildSpecs}}.
+%%--------------------------------------------------------------------
+%% @doc start_link/1
+%% @end
+%%--------------------------------------------------------------------
+-spec start_link(Args :: args()) -> {ok, term()}.
+start_link(Args) ->
+    supervisor:start_link({local, ?MODULE}, ?MODULE, Args).
 
-%% internal functions
+%%--------------------------------------------------------------------
+%% @doc supervisor_flags/0
+%% @end
+%%--------------------------------------------------------------------
+-spec supervisor_flags() -> map().
+supervisor_flags() ->
+    #{ strategy => one_for_all
+     , intensity => 0
+     , period => 1 }.
+
+%%--------------------------------------------------------------------
+%% @doc controller_sup/0
+%% @end
+%%--------------------------------------------------------------------
+-spec controller_sup() -> map().
+controller_sup() ->
+    #{ id => tiedonanto_controller_sup
+     , start => {tiedonanto_controller_sup, start_link, []}
+     , type => supervisor
+     }.
+
+%%--------------------------------------------------------------------
+%% @doc child_specs/0
+%% @end
+%%--------------------------------------------------------------------
+-spec child_specs() -> [map(), ...].
+child_specs() ->
+    [controller_sup()].
+
+%%--------------------------------------------------------------------
+%% @doc supervisor_state/0
+%% @end
+%%--------------------------------------------------------------------
+-spec supervisor_state() -> {map(), [map(), ...]}.
+supervisor_state() ->
+    { supervisor_flags()
+    , child_specs() }.
+
+%%--------------------------------------------------------------------
+%% @doc init/1
+%% @end
+%%--------------------------------------------------------------------
+-spec init(list()) -> {ok, {map(), [map(), ...]}}.
+init(_Args) ->
+    {ok, supervisor_state()}.
+

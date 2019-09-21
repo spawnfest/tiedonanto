@@ -1,15 +1,17 @@
 {application, tiedonanto,
- [{description, "An OTP application"},
+ [{description, "tiedonanto communication application"},
   {vsn, "0.1.0"},
-  {registered, []},
+  {registered, [ tiedonanto_sup
+               , tiedonanto_controller
+               , tiedonanto_controller_sup ]},
   {mod, {tiedonanto_app, []}},
-  {applications,
-   [kernel,
-    stdlib
-   ]},
+  {applications, [ kernel
+                 , stdlib
+                 , inets
+                 , ssl
+                 ]},
   {env,[]},
   {modules, []},
-
   {licenses, ["Apache 2.0"]},
-  {links, []}
+  {links, ["https://github.com/spawnfest/tiedonanto"]}
  ]}.
