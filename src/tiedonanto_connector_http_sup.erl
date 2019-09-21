@@ -2,20 +2,15 @@
 %%% @author Mathieu Kerjouan <contact@steepath.eu>
 %%% @copyright 2019 Mathieu Kerjouan
 %%%
-%%% @doc tiedonanto_connector_sup manage all processes relative to
-%%%      endpoint connection. That means this supervisor is the main
-%%%      to control the connector processes pool for each procotol.
-%%%      Fortunately, all processes with a specific protocol are 
-%%%      managed with their own supervisor.
+%%% @doc 
 %%% @end
 %%%-------------------------------------------------------------------
--module(tiedonanto_connector_sup).
--behaviour(supervisor).
+-module(tiedonanto_connector_http_sup).
 -export([start_link/0, start_link/1]).
 -export([init/1]).
--export([connector/0, connector/1]).
--export([connector_sup/1, connector_sup/2]).
--type args() :: list().
+-export([child_spec/0, child_spec/1]).
+-behavior(supervisor).
+-include_lib("eunit/include/eunit.hrl").
 
 %%--------------------------------------------------------------------
 %% @doc start_link/0
@@ -29,9 +24,14 @@ start_link() ->
 %% @doc start_link/1
 %% @end
 %%--------------------------------------------------------------------
--spec start_link(Args :: args()) -> {ok, term()}.
+-spec start_link(Args :: term()) -> {ok, term()}.
 start_link(Args) ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, Args).
+
+start_link1_test() ->
+    {ok, Pid} = start_link(),
+    ?assertEqual(erlang:is_pid(Pid), true),
+    ?assertEqual(erlang:whereis(?MODULE), Pid).
 
 %%--------------------------------------------------------------------
 %% @doc supervisor_flags/0
@@ -39,62 +39,27 @@ start_link(Args) ->
 %%--------------------------------------------------------------------
 -spec supervisor_flags() -> map().
 supervisor_flags() ->
-    #{ strategy => one_for_one
+    #{ strategy => simple_one_for_one
      , intensity => 0
      , period => 1 
      }.
 
 %%--------------------------------------------------------------------
-%% @doc connector/0
+%% @doc child_spec/0
 %% @end
 %%--------------------------------------------------------------------
--spec connector() -> map().
-connector() ->
-    connector([]).
+-spec child_spec() -> map().
+child_spec() -> child_spec([]).
 
 %%--------------------------------------------------------------------
-%% @doc connector/1
+%% @doc child_spec/1
 %% @end
 %%--------------------------------------------------------------------
--spec connector(Args :: list()) -> map().
-connector(Args) ->
-    #{ id => tiedonanto_connector
-     , start => {tiedonanto_connector, start_link, Args}
+-spec child_spec(Args :: term()) -> map().
+child_spec(Args) ->
+    #{ id => tiedonanto_connector_tcp 
+     , start => {tiedonanto_connector_tcp, start_link, Args}
      , type => worker
-     }.
-
-%%--------------------------------------------------------------------
-%% @doc connector_sup/1
-%% @end
-%%--------------------------------------------------------------------
--spec connector_sup(Protocol :: atom()) -> map().
-connector_sup(Protocol) ->
-    connector_sup(Protocol, []).
-
-%%--------------------------------------------------------------------
-%% @doc connector_sup/2
-%% @end
-%%--------------------------------------------------------------------
--spec connector_sup(Protocol :: atom(), Args :: list()) -> map().
-connector_sup(http, Args) ->
-    #{ id => tiedonanto_connector_http_sup
-     , start => {tiedonanto_connector_http_sup, start_link, Args}
-     , type => supervisor
-     };
-connector_sup(tcp, Args) ->
-    #{ id => tiedonanto_connector_tcp_sup
-     , start => {tiedonanto_connector_tcp_sup, start_link, Args}
-     , type => supervisor
-     };
-connector_sup(ssl, Args) ->
-    #{ id => tiedonanto_connector_ssl_sup
-     , start => {tiedonanto_connector_ssl_sup, start_link, Args}
-     , type => supervisor
-     };
-connector_sup(udp, Args) ->
-    #{ id => tiedonanto_connector_udp_sup
-     , start => {tiedonanto_connector_udp_sup, start_link, Args}
-     , type => supervisor
      }.
 
 %%--------------------------------------------------------------------
@@ -103,12 +68,7 @@ connector_sup(udp, Args) ->
 %%--------------------------------------------------------------------
 -spec child_specs() -> [map(), ...].
 child_specs() ->
-    [ connector()
-    , connector_sup(http)
-    , connector_sup(tcp)
-    , connector_sup(ssl)
-    , connector_sup(udp)
-    ].
+    [child_spec()].
 
 %%--------------------------------------------------------------------
 %% @doc supervisor_state/0
@@ -127,3 +87,4 @@ supervisor_state() ->
 -spec init(list()) -> {ok, {map(), [map(), ...]}}.
 init(_Args) ->
     {ok, supervisor_state()}.
+

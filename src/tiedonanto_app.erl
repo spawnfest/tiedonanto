@@ -11,10 +11,12 @@
 -behaviour(application).
 -export([start/2, stop/1]).
 
+-spec start(Type :: term(), Args :: list()) -> ok.
 start(_StartType, _StartArgs) ->
     pg2:start(),
     tiedonanto_sup:start_link().
 
+-spec stop(State :: term()) -> ok.
 stop(_State) ->
     ok.
 

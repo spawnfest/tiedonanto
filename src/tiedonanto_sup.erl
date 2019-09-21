@@ -84,4 +84,3 @@ supervisor_state() ->
 -spec init(list()) -> {ok, {map(), [map(), ...]}}.
 init(_Args) ->
     {ok, supervisor_state()}.
-

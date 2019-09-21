@@ -2,7 +2,10 @@
 %%% @author Mathieu Kerjouan <contact@steepath.eu>
 %%% @copyright 2019 Mathieu Kerjouan
 %%%
-%%% @doc 
+%%% @doc tiedonanto_connector_http module manage all dynamically
+%%%      http connector. To make things easier to understand, it
+%%%      spawn and control all http connector linked to 
+%%%      tiedonanto_connector_http_sup supervisor.
 %%% @end
 %%%-------------------------------------------------------------------
 -module(tiedonanto_connector_http).

@@ -6,6 +6,10 @@
                , tiedonanto_controller_sup 
                , tiedonanto_connector
                , tiedonanto_connector_sup
+               , tiedonanto_connector_http_sup
+               , tiedonanto_connector_tcp_sup
+               , tiedonanto_connector_ssl_sup
+               , tiedonanto_connector_udp_sup
                ]
   },
   {mod, {tiedonanto_app, []}},
