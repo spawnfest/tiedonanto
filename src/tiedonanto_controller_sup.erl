@@ -18,7 +18,7 @@ start_link(Args) ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, Args).
 
 supervisor_flags() ->
-    #{ strategy => one_for_all
+    #{ strategy => one_for_one
      , intensity => 0
      , period => 1 
      }.

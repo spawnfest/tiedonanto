@@ -19,39 +19,54 @@
                 }).
 
 %%--------------------------------------------------------------------
-%% @doc terminate/3
+%% @doc start_link/0
 %% @end
 %%--------------------------------------------------------------------
-start_link() ->
-    start_link([]).
+-spec start_link() -> {ok, pid()}.
+start_link() -> start_link([]).
 
-start_link(Args) ->
-    start_link(Args, []).
+%%--------------------------------------------------------------------
+%% @doc start_link/1
+%% @end
+%%--------------------------------------------------------------------
+-spec start_link(Args :: list()) -> {ok, pid()}.
+start_link(Args) -> start_link(Args, []).
 
+%%--------------------------------------------------------------------
+%% @doc start_link/2
+%% @end
+%%--------------------------------------------------------------------
+-spec start_link(Args :: list(), Opts :: list()) -> {ok, pid()}.
 start_link(Args, Opts) ->
     gen_statem:start_link(?MODULE, Args, Opts).
 
 %%--------------------------------------------------------------------
-%% @doc terminate/3
+%% @doc callback_mode/0
 %% @end
 %%--------------------------------------------------------------------
+-spec callback_mode() -> list().
 callback_mode() ->
     [ state_functions
     , state_enter
     ].
 
 %%--------------------------------------------------------------------
-%% @doc terminate/3
+%% @doc init/1
 %% @end
 %%--------------------------------------------------------------------
-init(Args) ->
-    {ok, wait, Args}.
+-spec init(Args :: list()) -> {ok, wait, term()}.
+init(_Args) -> 
+    ok = pg2:join(tiedonanto_connector_tcp, self()),
+    {ok, wait, []}.
 
 %%--------------------------------------------------------------------
 %% @doc terminate/3
 %% @end
 %%--------------------------------------------------------------------
+-spec terminate(Reason :: term(), State :: atom(), Data :: term())
+               -> ok.
 terminate(_Reason, _State, _Data) ->
+    pg2:leave(tiedonanto_connector_tcp, self()),
     ok.
 
 %%--------------------------------------------------------------------
@@ -92,7 +107,6 @@ wait(EventType, Event, Data) ->
 %%      (e.g. datastructure) comming from a controller. If the 
 %%      data-structure is well configured, the process start a 
 %%      tcp connection in active mode (directly connected to a port).
-%%      
 %% @end
 %%--------------------------------------------------------------------
 -spec active(atom() | tuple(), term(), term())
@@ -112,7 +126,7 @@ active(info, {tcp_closed, Port}, #struct{ socket = Port } = Data) ->
     {next_state, wait, Data#struct{ port = undefined }}.
 
 %%--------------------------------------------------------------------
-%% @doc
+%% @doc connect/3 same as connect/4, setting Opts argument to [].
 %% @end
 %%--------------------------------------------------------------------
 -spec connect( Pid :: pid()
@@ -122,6 +136,12 @@ active(info, {tcp_closed, Port}, #struct{ socket = Port } = Data) ->
 connect(Pid, Target, Port) ->
     connect(Pid, Target, Port, []).
 
+%%--------------------------------------------------------------------
+%% @doc connect/4 connects to a remote end-point and switch the 
+%%      current FSM to active state, waiting for message to send and
+%%      receive.
+%% @end
+%%--------------------------------------------------------------------
 -spec connect( Pid :: pid()
              , Target :: atom() | tuple()
              , Port :: integer()
@@ -131,7 +151,8 @@ connect(Pid, Target, Port, Opts) ->
     gen_statem:call(Pid, {connect, {Target, Port, Opts}}).
 
 %%--------------------------------------------------------------------
-%% @doc
+%% @doc send/2 gives the possibility to send a message to the defined
+%%      process in first argument.
 %% @end
 %%--------------------------------------------------------------------
 -spec send(Pid :: pid(), Message :: bitstring()) -> ok.

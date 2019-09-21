@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# compile the current project
+rebar3 compile
+
+# run all unit test
+rebar3 eunit
+
+# run all common test
+rebar3 ct
+
+# generate the documentation
+rebar3 edoc

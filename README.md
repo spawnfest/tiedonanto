@@ -49,11 +49,19 @@ You can also use `common_test` to test the full node.
 rebar3 ct
 ```
 
+## How to generate doc
+
+This command will generate all documentation and store in `doc`
+directory.
+
+```
+rebar3 edoc
+```
+
 ## How to use
 
 ```
 rebar3 shell
-
 ```
 
 ## About the SpawnFest

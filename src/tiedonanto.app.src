@@ -4,6 +4,7 @@
   {registered, [ tiedonanto_sup
                , tiedonanto_controller
                , tiedonanto_controller_sup 
+               , tiedonanto_connector
                , tiedonanto_connector_sup
                ]
   },
@@ -12,7 +13,6 @@
                  , stdlib
                  , inets
                  , ssl
-                 , pg2
                  ]
   },
   {env,[]},

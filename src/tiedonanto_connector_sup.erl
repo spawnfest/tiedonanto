@@ -1,4 +1,7 @@
 %%%-------------------------------------------------------------------
+%%% @author Mathieu Kerjouan <contact@steepath.eu>
+%%% @copyright 2019 Mathieu Kerjouan
+%%%
 %%% @doc tiedonanto_sup is the main application supervisor.
 %%% @end
 %%%-------------------------------------------------------------------
@@ -31,7 +34,7 @@ start_link(Args) ->
 %%--------------------------------------------------------------------
 -spec supervisor_flags() -> map().
 supervisor_flags() ->
-    #{ strategy => simple_one_for_all
+    #{ strategy => one_for_one
      , intensity => 0
      , period => 1 
      }.
@@ -61,7 +64,7 @@ connector(Args) ->
 %%--------------------------------------------------------------------
 -spec child_specs() -> [map(), ...].
 child_specs() ->
-    [].
+    [connector()].
 
 %%--------------------------------------------------------------------
 %% @doc supervisor_state/0
