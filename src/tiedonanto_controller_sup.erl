@@ -20,7 +20,8 @@ start_link(Args) ->
 supervisor_flags() ->
     #{ strategy => one_for_all
      , intensity => 0
-     , period => 1 }.
+     , period => 1 
+     }.
 
 controller_spec() ->
     #{ id => tiedonanto_controller

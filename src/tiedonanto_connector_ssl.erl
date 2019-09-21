@@ -5,7 +5,7 @@
 %%% @doc 
 %%% @end
 %%%-------------------------------------------------------------------
--module(tiedonanto_connector_tcp).
+-module(tiedonanto_connector_ssl).
 -behavior(gen_statem).
 -export([start_link/0, start_link/1, start_link/2]).
 -export([callback_mode/0, init/1, terminate/3]).
@@ -64,7 +64,7 @@ terminate(_Reason, _State, _Data) ->
 wait(enter, _OldState, Data) ->
     {next_state, wait, Data};
 wait({call, From}, {connect, {Target, Port, Opts}}, Data) ->
-    case gen_tcp:connect(Target, Port, Opts) of
+    case ssl:connect(Target, Port, Opts) of
         {ok, Socket} -> 
             erlang:port_connect(Socket, self()),
             { next_state
@@ -100,7 +100,7 @@ wait(EventType, Event, Data) ->
 active(enter, _OldState, Data) ->
     {next_state, active, Data};
 active(cast, {send, Message}, #struct{ socket = Socket } = Data) ->
-    gen_tcp:send(Socket, Message),
+    ssl:send(Socket, Message),
     {keep_state, Data};
 active({call, From}, {send, Message}, Data) ->
     {keep_state, Data, [{reply, From, ok}]};
@@ -108,7 +108,7 @@ active(info, {tcp, Port, Message}, #struct{ socket = Port } = Data) ->
     logger:info("receive ~p from ~p", [Port, Message]),
     {keep_state, Data};    
 active(info, {tcp_closed, Port}, #struct{ socket = Port } = Data) ->
-    gen_tcp:close(Port),
+    ssl:close(Port),
     {next_state, wait, Data#struct{ port = undefined }}.
 
 %%--------------------------------------------------------------------

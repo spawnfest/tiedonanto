@@ -3,13 +3,18 @@
   {vsn, "0.1.0"},
   {registered, [ tiedonanto_sup
                , tiedonanto_controller
-               , tiedonanto_controller_sup ]},
+               , tiedonanto_controller_sup 
+               , tiedonanto_connector_sup
+               ]
+  },
   {mod, {tiedonanto_app, []}},
   {applications, [ kernel
                  , stdlib
                  , inets
                  , ssl
-                 ]},
+                 , pg2
+                 ]
+  },
   {env,[]},
   {modules, []},
   {licenses, ["Apache 2.0"]},
