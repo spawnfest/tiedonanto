@@ -28,11 +28,6 @@ start_link() ->
 start_link(Args) ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, Args).
 
-start_link1_test() ->
-    {ok, Pid} = start_link(),
-    ?assertEqual(erlang:is_pid(Pid), true),
-    ?assertEqual(erlang:whereis(?MODULE), Pid).
-
 %%--------------------------------------------------------------------
 %% @doc supervisor_flags/0
 %% @end

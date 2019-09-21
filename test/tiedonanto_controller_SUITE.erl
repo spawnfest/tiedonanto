@@ -25,9 +25,9 @@ end_per_testcase(_Case, Config) ->
     Config.
 
 all() ->
-    [controller].
+    [ controller
+    ].
 
 controller(Config) ->
-    {ok, Pid} = tiedonanto_controller:start_link(),
-    ok = tiedonanto_controller:stop().
+    ok.
     

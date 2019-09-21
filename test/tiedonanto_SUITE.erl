@@ -25,6 +25,30 @@ end_per_testcase(_Case, Config) ->
     Config.
 
 all() ->
-    [].
+    [ create_connectors
+    , create_contents
+    , create_rules
+    ].
+
+%%--------------------------------------------------------------------
+%% @doc a connector control an end-point.
+%% @end
+%%--------------------------------------------------------------------
+create_connectors(Config) ->
+    ok.
+
+%%--------------------------------------------------------------------
+%% @doc create 
+%% @end
+%%--------------------------------------------------------------------
+create_rules(Config) ->
+    ok.
+
+%%--------------------------------------------------------------------
+%% @doc create a new content based on test connector
+%% @end
+%%--------------------------------------------------------------------
+create_contents(Config) ->
+    ok.
 
 

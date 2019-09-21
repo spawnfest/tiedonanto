@@ -12,6 +12,7 @@
 -export([wait/3, active/3]).
 -export([connect/3, connect/4]).
 -export([send/2]).
+-include_lib("eunit/include/eunit.hrl").
 -record(struct, { target = undefined
                 , port = undefined
                 , opts = []
@@ -56,7 +57,8 @@ callback_mode() ->
 %%--------------------------------------------------------------------
 -spec init(Args :: list()) -> {ok, wait, term()}.
 init(_Args) -> 
-    ok = pg2:join(tiedonanto_connector_tcp, self()),
+    logger:info("add ~p in ~p pg2 group", [self(), ?MODULE]),
+    ok = pg2:join(?MODULE, self()),
     {ok, wait, []}.
 
 %%--------------------------------------------------------------------
@@ -66,7 +68,7 @@ init(_Args) ->
 -spec terminate(Reason :: term(), State :: atom(), Data :: term())
                -> ok.
 terminate(_Reason, _State, _Data) ->
-    pg2:leave(tiedonanto_connector_tcp, self()),
+    pg2:leave(?MODULE, self()),
     ok.
 
 %%--------------------------------------------------------------------
