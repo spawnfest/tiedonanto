@@ -26,7 +26,7 @@
 -export([rules/1]).
 -export([endpoint/1]).
 -export([payload/1]).
--include("tiedonanto_struct.hrl").
+-include("tiedonanto.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 %%--------------------------------------------------------------------
@@ -51,7 +51,7 @@ new0_test() ->
          (endpoint) -> tiedonanto_endpoint();
          (payload) -> tiedonanto_payload().
 new(rules) ->
-    #{};
+    tiedonanto_rules:new();
 new(endpoint) ->
     #{};
 new(payload) ->
