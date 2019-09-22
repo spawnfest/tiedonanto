@@ -9,8 +9,11 @@
 %%% @end
 %%%-------------------------------------------------------------------
 -module(tiedonanto_connector).
+-export([start_link/0, start_link/1, start_link/2]).
+-export([callback_mode/0, init/1, terminate/3]).
+-export([main/3]).
+-export([start_child/1, start_child/2]).
 -behavior(gen_statem).
--compile(export_all).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -84,7 +87,7 @@ terminate(_Reason, _State, _Data) ->
     ok.
 
 %%--------------------------------------------------------------------
-%% @doc
+%% @doc main/3 is the main state to manage all connectors.
 %% @end
 %%--------------------------------------------------------------------
 -spec main(enter, term(), term()) 
@@ -93,8 +96,47 @@ terminate(_Reason, _State, _Data) ->
           -> {keep_state, Data :: term()}.
 main(enter, _OldState, Data) ->
     {next_state, main, Data};
+main(cast, {start, Type, Args}, Data) ->
+    handle_start_child(Type, Args, Data);
 main(EventType, Event, Data) ->
+    logger:debug("got event type ~p: ~p", [EventType, Event]),
     {keep_state, Data}.
-    
 
+%%--------------------------------------------------------------------
+%% @doc handle_start_child/3 is a private function, used to make a 
+%%      strong separation between the main state (here main/3) and
+%%      the data received. If the project become larger, this function
+%%      can be stored in another module.
+%% @end
+%%--------------------------------------------------------------------
+handle_start_child(tcp, Args, Data) ->
+    tiedonanto_connector_tcp_sup:start_child(Args),    
+    {keep_state, Data};
+handle_start_child(udp, Args, Data) ->
+    tiedonanto_connector_udp_sup:start_child(Args),
+    {keep_state, Data};
+handle_start_child(http, Args, Data) ->
+    tiedonanto_connector_udp_sup:start_child(Args),
+    {keep_state, Data};
+handle_start_child(ssl, Args, Data) ->
+    tiedonanto_connector_udp_sup:start_child(Args),
+    {keep_state, Data};
+handle_start_child(Else, Args, Data) ->
+    logger:error("unsupported type ~p with argument ~p", [Else, Args]),
+    {keep_state, Data}.
 
+%%--------------------------------------------------------------------
+%% @doc
+%% @end
+%%--------------------------------------------------------------------
+-spec start_child(Type :: atom()) -> ok.
+start_child(Type) ->
+    start_child(Type, []).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% @end
+%%--------------------------------------------------------------------
+-spec start_child(Type :: atom(), Args :: term()) -> ok.
+start_child(Type, Args) ->
+    gen_statem:cast(?MODULE, {start, Type, Args}).

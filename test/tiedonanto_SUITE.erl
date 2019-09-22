@@ -25,7 +25,7 @@ end_per_testcase(_Case, Config) ->
     Config.
 
 all() ->
-    [ create_connectors
+    [ create_controllers
     , create_contents
     , create_rules
     ].
@@ -34,7 +34,7 @@ all() ->
 %% @doc a connector control an end-point.
 %% @end
 %%--------------------------------------------------------------------
-create_connectors(Config) ->
+create_controllers(Config) ->
     ok.
 
 %%--------------------------------------------------------------------

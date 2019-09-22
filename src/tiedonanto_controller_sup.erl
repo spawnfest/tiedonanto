@@ -34,8 +34,6 @@ start_link(Args) ->
 -spec supervisor_flags() -> map().
 supervisor_flags() ->
     #{ strategy => one_for_one
-     , intensity => 0
-     , period => 1 
      }.
 
 %%--------------------------------------------------------------------

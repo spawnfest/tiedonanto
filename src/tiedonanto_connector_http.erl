@@ -13,6 +13,12 @@
 -export([init/1, callback_mode/0, terminate/3]).
 -export([wait/3, active/3]).
 -behavior(gen_statem).
+-record(struct, { target = undefined
+                , port = undefined 
+                , path = undefined 
+                , socket = undefined 
+                , opts = [] 
+                }).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -52,8 +58,8 @@ callback_mode() ->
 %%--------------------------------------------------------------------
 -spec init(Args :: list()) -> {ok, atom(), term()}.
 init(_Args) ->
-    ok = pg2:join(tiedonanto_connector_http, self()),
-    {ok, wait, []}.
+    ok = pg2:join(?MODULE, self()),
+    {ok, wait, #struct{}}.
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -62,7 +68,7 @@ init(_Args) ->
 -spec terminate(Reason :: term(), State :: atom(), Data :: term()) 
                -> ok.
 terminate(_Reason, _State, _Data) ->
-    pg2:leave(tiedonanto_connector_http, self()),
+    pg2:leave(?MODULE, self()),
     ok.
 
 %%--------------------------------------------------------------------

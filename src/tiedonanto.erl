@@ -29,7 +29,7 @@ controller(Name) ->
 -spec controller(Name :: atom(), Opts :: list()) 
                -> {ok, atom(), list()}.
 controller(Name, Opts) ->
-    ok.
+    tiedonanto_controller:controller(Name, Opts).
 
 %%--------------------------------------------------------------------
 %% @doc controllers/0 list all available controllers.
@@ -37,7 +37,7 @@ controller(Name, Opts) ->
 %%--------------------------------------------------------------------
 -spec controllers() -> [atom(), ...].
 controllers() ->
-    ok.
+    tiedonanto_controller:controllers().
 
 %%--------------------------------------------------------------------
 %% @doc rule/2 create a new rule into a controller, by default, rule/2

@@ -59,7 +59,7 @@ callback_mode() ->
 init(_Args) -> 
     logger:info("add ~p in ~p pg2 group", [self(), ?MODULE]),
     ok = pg2:join(?MODULE, self()),
-    {ok, wait, []}.
+    {ok, wait, #struct{}}.
 
 %%--------------------------------------------------------------------
 %% @doc terminate/3
@@ -120,12 +120,16 @@ active(cast, {send, Message}, #struct{ socket = Socket } = Data) ->
     {keep_state, Data};
 active({call, From}, {send, Message}, Data) ->
     {keep_state, Data, [{reply, From, ok}]};
-active(info, {tcp, Port, Message}, #struct{ socket = Port } = Data) ->
-    logger:info("receive ~p from ~p", [Port, Message]),
-    {keep_state, Data};    
-active(info, {tcp_closed, Port}, #struct{ socket = Port } = Data) ->
-    gen_tcp:close(Port),
-    {next_state, wait, Data#struct{ port = undefined }}.
+active(info, {tcp, Socket, Message}, #struct{ socket = Socket } = Data) ->
+    logger:debug("receive ~p from ~p", [Socket, Message]),
+    {keep_state, Data};
+active(info, {tcp_error, Socket, Reason}, #struct{ socket = Socket } = Data) ->
+    logger:error("~p: error on socket ~p, reason ~p",[?MODULE, Socket, Reason]),
+    {next_state, wait, Data#struct{ socket = undefined }};
+active(info, {tcp_closed, Socket}, #struct{ socket = Socket } = Data) ->
+    logger:debug("~p: connection closed ~p", [Socket]),
+    gen_tcp:close(Socket),
+    {next_state, wait, Data#struct{ socket = undefined }}.
 
 %%--------------------------------------------------------------------
 %% @doc connect/3 same as connect/4, setting Opts argument to [].
