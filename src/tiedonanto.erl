@@ -44,28 +44,30 @@ controllers() ->
 %%      only allocate the rule but does not create any content in it.
 %% @end
 %%--------------------------------------------------------------------
--spec rule(Controller :: atom(), Name :: atom()) 
+-spec rule(ControllerName :: atom(), RuleName :: atom()) 
           -> {ok, atom(), list()}.
-rule(Controller, Name) ->
-    rule(Controller, Name, []).
+rule(ControllerName, RuleName) ->
+    rule(ControllerName, RuleName, []).
 
 %%--------------------------------------------------------------------
 %% @doc rule/3 create a new rule into a controller by allocating
 %%      it and adding all parameters.
 %% @end
 %%--------------------------------------------------------------------
--spec rule(Controller :: atom(), Name :: atom(), Content :: list()) 
+-spec rule( ControllerName :: atom()
+          , RuleName :: atom()
+          , Content :: list()) 
           -> {ok, atom(), list()}.
-rule(Controller, Name, Content) ->
-    ok.
+rule(ControllerName, RuleName, Content) ->
+    tiedonanto_rules:rule(ControllerName, RuleName, Content).
 
 %%--------------------------------------------------------------------
 %% @doc rules/1 list all available rules from a controller.
 %% @end
 %%--------------------------------------------------------------------
--spec rules(Controller :: atom()) -> {ok, list()}.
-rules(Controller) ->
-    ok.
+-spec rules() -> {ok, list()}.
+rules() ->
+    tiedonanto_rules:rules().
 
 %%--------------------------------------------------------------------
 %% @doc content/1

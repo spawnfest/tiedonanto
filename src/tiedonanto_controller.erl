@@ -12,8 +12,11 @@
 -export([init/1, terminate/2]).
 -export([handle_call/3, handle_cast/2]).
 -export([controller/1, controller/2, controllers/0]).
+-export([rule/2, rule/3, rules/0]).
 -behavior(gen_server).
--record(state, {db}).
+-record(state, { controllers_db :: reference()
+               , rules_db :: reference()
+               }).
 
 %%--------------------------------------------------------------------
 %% @doc start_link/0
@@ -53,7 +56,9 @@ stop() ->
 %%--------------------------------------------------------------------
 -spec init(Args :: list()) -> {ok, #state{}}.
 init(_Args) ->
-    State = #state{ db = ets:new(?MODULE, []) },
+    State = #state{ controllers_db = ets:new(?MODULE, []) 
+                  , rules_db = ets:new(?MODULE, [])
+                  },
     logger:debug("create ets ~p", [State]),
     {ok, State}.
 
@@ -70,15 +75,14 @@ terminate(_Reason, State) ->
 %% @doc handle_call/3
 %% @end
 %%--------------------------------------------------------------------
--spec handle_call(Data :: term(), From :: term(), State :: #state{}) -> {reply, term(), #state{}}.
-handle_call({new, Controller, Opts}, _From, #state{ db = DB } = State) ->
-    logger:debug("add new controller ~p with options ~p", [Controller, Opts]),
-    _Result = ets:insert(DB, {Controller, Opts}),
-    {reply, {ok, Controller, Opts}, State};
-handle_call({get, all}, _From, #state{ db = DB } = State) ->
-    logger:debug("get all state"),
-    Result = ets:select(DB, [{{'$1', '$2'}, [], [{{'$1', '$2'}}]}]),
-    {reply, {ok, Result}, State};
+-spec handle_call( Data :: term()
+                 , From :: term()
+                 , State :: #state{}) 
+                 -> {reply, term(), #state{}}.
+handle_call({create, Create}, _From, State) ->
+    handle_create(Create, State);
+handle_call({get, Get}, _From, State) ->
+    handle_get(Get, State);
 handle_call(Data, From, State) ->
     logger:debug("receive ~p from ~p", [Data, From]),
     {reply, Data, State}.
@@ -91,6 +95,36 @@ handle_call(Data, From, State) ->
 handle_cast(Data, State) ->
     logger:debug("receive ~p", [Data]),
     {noreply, State}.
+
+%%--------------------------------------------------------------------
+%% @doc
+%% @end
+%%--------------------------------------------------------------------
+handle_create({controller, ControllerName, Opts}
+              ,#state{ controllers_db = CDB } = State) ->
+    logger:debug("add new controller ~p with options ~p", [ControllerName, Opts]),
+    _Result = ets:insert(CDB, {ControllerName, Opts}),
+    {reply, {ok, ControllerName, Opts}, State};
+handle_create({rule, ControllerName, RuleName, Opts}
+             ,#state{ rules_db = RDB } = State) ->
+    logger:debug("add new rule ~p with options ~p", [RuleName, Opts]),
+    _Result = ets:insert(RDB, {RuleName, ControllerName, Opts}),
+    {reply, {ok, {ControllerName, RuleName, Opts}}, State}.
+
+%%--------------------------------------------------------------------
+%% @doc
+%% @end
+%%--------------------------------------------------------------------
+handle_get({controller, all}
+          ,#state{ controllers_db = CDB } = State) ->
+    logger:debug("get all state"),
+    Result = ets:select(CDB, [{{'$1', '$2'}, [], [{{'$1', '$2'}}]}]),
+    {reply, {ok, Result}, State};
+handle_get({rule, all}
+          ,#state{ rules_db = RDB } = State) ->
+    Select = [{{'$1', '$2', '$3'}, [], [{{'$2', '$1', '$3'}}]}],
+    Result = ets:select(RDB, Select),
+    {reply, {ok, Result}, State}.
 
 %%--------------------------------------------------------------------
 %% @doc controller/2 API
@@ -108,7 +142,8 @@ controller(Controller) ->
 -spec controller(Controller :: term(), Opts :: list()) 
                 -> {ok, {term(), list()}}.
 controller(Controller, Opts) ->
-    gen_server:call(?MODULE, {new, Controller, Opts}).
+    Request = {create, {controller, Controller, Opts}},
+    gen_server:call(?MODULE, Request).
 
 %%--------------------------------------------------------------------
 %% @doc controllers API
@@ -116,4 +151,30 @@ controller(Controller, Opts) ->
 %%--------------------------------------------------------------------
 -spec controllers() -> {ok, list()}.
 controllers() ->
-    gen_server:call(?MODULE, {get, all}).
+    Request = {get, {controller, all}},
+    gen_server:call(?MODULE, Request).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% @end
+%%--------------------------------------------------------------------
+rule(ControllerName, RuleName) ->
+    rule(ControllerName, RuleName, []).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% @end
+%%--------------------------------------------------------------------
+rule(ControllerName, RuleName, Opts) ->
+    Request = {create, {rule, ControllerName, RuleName, Opts}},
+    gen_server:call(?MODULE, Request).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% @end
+%%--------------------------------------------------------------------
+rules() ->
+    Request = {get, {rule, all}},
+    gen_server:call(?MODULE, Request).
+
+    

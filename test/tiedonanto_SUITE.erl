@@ -13,12 +13,14 @@ suite() ->
     [].
 
 init_per_suite(Config) ->
+    application:ensure_all_started(tiedonanto),
     Config.
 
 init_per_testcase(_Case, Config) ->
     Config.
 
 end_per_suite(Config) ->
+    application:stop(tiedonanto),
     Config.
 
 end_per_testcase(_Case, Config) ->
@@ -35,14 +37,17 @@ all() ->
 %% @end
 %%--------------------------------------------------------------------
 create_controllers(Config) ->
-    ok.
+    {ok, test_controller, []} = tiedonanto:controller(test_controller, []),
+    {ok, [{test_controller, []}]} = tiedonanto:controllers().
 
 %%--------------------------------------------------------------------
 %% @doc create 
 %% @end
 %%--------------------------------------------------------------------
 create_rules(Config) ->
-    ok.
+    TestRule = tiedonanto:rule(test_controller, test_rule, []),
+    {ok, {test_controller, test_rule, []}} = TestRule.
+        
 
 %%--------------------------------------------------------------------
 %% @doc create a new content based on test connector

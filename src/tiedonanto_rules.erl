@@ -9,10 +9,16 @@
 -include("tiedonanto.hrl").
 -compile(export_all).
 
+rule(ControllerName, RuleName) ->
+    rule(ControllerName, RuleName, []).
+
+rule(ControllerName, RuleName, Content) ->
+    tiedonanto_controller:rule(ControllerName, RuleName, Content).
+
 %%--------------------------------------------------------------------
-%%
+%% 
 %%--------------------------------------------------------------------
--spec new() ->
+-spec new(Content :: term(), Action :: function()) -> #rule{}.
 new(Content, Action) ->
     {ok, C} = content(Content),
     {ok, A} = action(Action),
@@ -23,7 +29,7 @@ new(Content, Action) ->
 %%--------------------------------------------------------------------
 %%
 %%--------------------------------------------------------------------
--spec content(Content :: list()) -> {ok, Content}.
+-spec content(Content :: list()) -> {ok, term()}.
 content(Content) 
   when is_list(Content) ->
     {ok, Content}.
